@@ -6,10 +6,23 @@ var Repos = React.createClass({
     repos: React.PropTypes.array.isRequired
   },
   render: function() {
-    console.log('Repos: ', this.props.repos);
+    //React requires you to have a key on all items in an array in the view
+    //The '&&' below is actually the equivalent of an if statement:
+    //if the first portion, then do the second portion
+    var repos = this.props.repos.map(function(repo, index) {
+      return (
+        <li className="list-group-item" key={index}>
+          {repo.html_url && <h4><a href={repo.html_url}>{repo.name}</a></h4>}
+          {repo.description && <p> {repo.description} </p>}
+        </li>
+      )
+    });
     return (
       <div>
-        <p>REPOS</p>
+        <h3> User Repos </h3>
+        <ul className="list-group">
+          {repos}
+        </ul>
       </div>
     )
   }
