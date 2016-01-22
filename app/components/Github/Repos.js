@@ -1,10 +1,12 @@
 var React = require('react');
 
 var Repos = React.createClass({
+
   propTypes: {
     username: React.PropTypes.string.isRequired,
     repos: React.PropTypes.array.isRequired
   },
+
   render: function() {
     //React requires you to have a key on all items in an array in the view
     //The '&&' below is actually the equivalent of an if statement:

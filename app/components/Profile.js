@@ -2,10 +2,10 @@ var React = require('react');
 var Router = require('react-router');
 var Repos = require('./Github/Repos');
 var UserProfile = require('./Github/UserProfile');
-var Notes = require('./Notes/Notes');
+import Notes from './Notes/Notes';
 var ReactFireMixin = require('reactfire');
 var Firebase = require('firebase');
-var helpers = require('../utils/helpers');
+import getGithubInfo from '../utils/helpers';
 
 var Profile = React.createClass({
   mixins: [ReactFireMixin],
@@ -15,30 +15,40 @@ var Profile = React.createClass({
       notes: [1, 2, 3],
       bio: {},
       repos: []
-    }
+    };
   },
 
   componentDidMount: function() {
     //ajax requests will go here
     this.ref = new Firebase('https://github-notepad.firebaseio.com/');
-    var childRef = this.ref.child(this.props.params.username);
-    this.bindAsArray(childRef, 'notes');
-
-    helpers.getGithubInfo(this.props.params.username)
-      .then(function(data) {
-        this.setState({
-          bio: data.bio,
-          repos: data.repos
-        })
-      }.bind(this));
+    this.init(this.props.params.username);
   },
+
+  componentWillReceiveProps: function(nextProps) {
+    this.unbind('notes');
+    this.init(nextProps.params.username);
+  },
+
   componentWillUnmount: function() {
     this.unbind('notes');
   },
 
+  init: function(username) {
+    var childRef = this.ref.child(username);
+    this.bindAsArray(childRef, 'notes');
+
+    getGithubInfo(username)
+      .then(function(data) {
+        this.setState({
+          bio: data.bio,
+          repos: data.repos
+        });
+      }.bind(this));
+  },
+
   handleAddNote: function(newNote) {
     //update firebase with the newNote
-    this.ref.child(this.props.params.username).child(this.state.notes.length + 1).set(newNote)
+    this.ref.child(this.props.params.username).child(this.state.notes.length + 1).set(newNote);
   },
 
   render: function(){
