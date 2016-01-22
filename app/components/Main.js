@@ -1,22 +1,24 @@
 import React from 'react';
 import SearchGithub from './SearchGithub';
 
-class Main extends React.Component{
-  render() {
-    return (
-      <div className="main-container">
-        <nav className="navbar navbar-default" role="navigation">
-          <div className="col-sm-7 col-sm-offset-2" style={{marginTop: 15}}>
-            <SearchGithub history={this.props.history}/>
-          </div>
-        </nav>
-        <div className="container">
-          {this.props.children}
+//Main is passed props, and the parameters
+//inside curly braces are the properties of props
+//This is a feature of es6 called 'destructuring' objects
+const Main = ({history, children}) => {
+  return (
+    <div className="main-container">
+      <nav className="navbar navbar-default" role="navigation">
+        <div className="col-sm-7 col-sm-offset-2" style={{marginTop: 15}}>
+          <SearchGithub history={history}/>
         </div>
+      </nav>
+      <div className="container">
+        {children}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
 
 //this.props.children gets replaced with active component
 //this.props.history: can't use mixins with React. Router passes methods
