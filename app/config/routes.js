@@ -11,3 +11,8 @@ export default (
   </Route>
 );
 //IndexRoute: activate this component if none of the routes earlier match
+
+//Because Main is being controlled by the Router on line 8,
+//it gets access to Router's methods like history,
+//which we will pass on to the SearchGithub child component
+//--> see Main.js

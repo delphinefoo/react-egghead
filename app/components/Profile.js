@@ -1,41 +1,49 @@
-var React = require('react');
-var Router = require('react-router');
-var Repos = require('./Github/Repos');
-var UserProfile = require('./Github/UserProfile');
+import React from 'react';
+import Repos from './Github/Repos';
+import UserProfile from './Github/UserProfile';
 import Notes from './Notes/Notes';
-var ReactFireMixin = require('reactfire');
-var Firebase = require('firebase');
 import getGithubInfo from '../utils/helpers';
+import Rebase from 're-base';
 
-var Profile = React.createClass({
-  mixins: [ReactFireMixin],
+const base = Rebase.createClass('https://github-notepad.firebaseio.com/');
 
-  getInitialState: function() {
-    return {
-      notes: [1, 2, 3],
+class Profile extends React.Component{
+  //in es6, this is a method that is called when
+  //class is instantiated
+  //always pass constructor props
+  //and then call super with props inside constructor
+  //you can't use 'this' keyword inside a constructor
+  //before you call super, passi'ng in 'props
+  constructor(props){
+    super(props);
+    this.state = {
+      notes: [],
       bio: {},
       repos: []
     };
-  },
+  }
 
-  componentDidMount: function() {
+
+  componentDidMount() {
     //ajax requests will go here
-    this.ref = new Firebase('https://github-notepad.firebaseio.com/');
     this.init(this.props.params.username);
-  },
+  }
 
-  componentWillReceiveProps: function(nextProps) {
-    this.unbind('notes');
+  componentWillReceiveProps(nextProps) {
+    base.removeBinding(this.ref);
     this.init(nextProps.params.username);
-  },
+  }
 
-  componentWillUnmount: function() {
-    this.unbind('notes');
-  },
+  componentWillUnmount() {
+    base.removeBinding(this.ref);
+  }
 
-  init: function(username) {
-    var childRef = this.ref.child(username);
-    this.bindAsArray(childRef, 'notes');
+  init(username) {
+    this.ref = base.bindToState(username, {
+      context: this,
+      asArray: true,
+      state: 'notes'
+    });
 
     getGithubInfo(username)
       .then(function(data) {
@@ -44,14 +52,16 @@ var Profile = React.createClass({
           repos: data.repos
         });
       }.bind(this));
-  },
+  }
 
-  handleAddNote: function(newNote) {
+  handleAddNote(newNote) {
     //update firebase with the newNote
-    this.ref.child(this.props.params.username).child(this.state.notes.length + 1).set(newNote);
-  },
+    base.post(this.props.params.username, {
+      data: this.state.notes.concat([newNote])
+    });
+  }
 
-  render: function(){
+  render(){
     return (
       <div className="row">
         <div className="col-md-4">
@@ -64,11 +74,11 @@ var Profile = React.createClass({
           <Notes
           username = {this.props.params.username}
           notes =  {this.state.notes}
-          addNote = {this.handleAddNote} />
+          addNote = {(newNote) => this.handleAddNote(newNote)} />
         </div>
       </div>
     );
   }
-});
+}
 
-module.exports = Profile;
+export default Profile;
